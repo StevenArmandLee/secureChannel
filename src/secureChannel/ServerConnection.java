@@ -58,7 +58,7 @@ public class ServerConnection {
 		socketIO.sendPacket(nonce,key,responses);
 		try {
 			packet = (Packet)requests.readObject();
-			clientNonce=cryptoTools.decrypt(packet.message, key);
+			clientNonce=cryptoTools.getMessage(packet.getMessage(), key);
 		} catch (ClassNotFoundException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();

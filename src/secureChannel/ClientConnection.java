@@ -81,7 +81,7 @@ public class ClientConnection {
 		
 		try {
 			packet = (Packet)responseStream.readObject();
-			hostNonce=cryptoTools.decrypt(packet.message, key);
+			hostNonce=cryptoTools.getMessage(packet.getMessage(), key);
 		} catch (ClassNotFoundException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();

@@ -4,9 +4,9 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 
 public class CryptoTools {
-	RC4 rc4 = new RC4();
+	static RC4 rc4 = new RC4();
 	
-	public String encrypt(String message, String key)
+	public static String encrypt(String message, String key)
 	{
 		StringBuffer stringBuffer = new StringBuffer();
 		for(int i=0; i<rc4.crypt(key, message).length;i++)
@@ -16,7 +16,7 @@ public class CryptoTools {
 	
 		return stringBuffer.toString();
 	}
-	public String decrypt(String message, String key)
+	public static String decrypt(String message, String key)
 	{
 	
 		return encrypt(message,key);
@@ -39,17 +39,36 @@ public class CryptoTools {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		
-		
-		
-		
 		return stringBuffer.toString();
 	}
 	
-	public boolean authenticateMessage(String message, String hashOfMessage, String key)
+	public static String encryptMessage(String message, String key)
+	{
+		String hash = SHA1(key+message+key);
+		String cipherText = encrypt(message+hash,key);
+		
+		return cipherText;
+		
+	}
+	
+	public static String getMessage(String message, String key)
+	{
+		return decrypt(message,key).substring(0, message.length()-40);
+	}
+	
+	public static String getHash (String message, String key)
+	{
+		return decrypt(message,key).substring(message.length()-40, message.length());
+		//return message.substring(message.length()-40, message.length());
+	}
+	
+	public boolean authenticateMessage(String message, String key)
 	{
 		boolean decision = false;
-		if(SHA1(decrypt(message, key)).equals(hashOfMessage))
+		String hashOfMessage = getHash(message,key);
+		String actualMessage = getMessage(message, key);
+		
+		if(SHA1(key+actualMessage+key).equals(hashOfMessage))
 		{
 			decision= true;
 		}

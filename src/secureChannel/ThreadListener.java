@@ -26,9 +26,11 @@ public class ThreadListener implements Runnable{
 			try {
 				
 				Packet packet = (Packet)responseStream.readObject();
-				if(cryptoTools.authenticateMessage(packet.getMessage(), packet.getHashOfMessage(), key))
+				//cryptoTools.getMessage(packet.getMessage(), key);
+				//cryptoTools.getHash(packet.getMessage(),key);
+				if(cryptoTools.authenticateMessage(packet.getMessage(), key))
 				{
-					System.out.println(cryptoTools.decrypt(packet.getMessage(), key));
+					System.out.println(cryptoTools.getMessage(packet.getMessage(), key));
 					
 				}
 				else

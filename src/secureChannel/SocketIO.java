@@ -9,7 +9,8 @@ public class SocketIO {
 
 	public void sendPacket(String message, String key, ObjectOutputStream responses)
 	{
-		Packet packet = new Packet(cryptoTools.decrypt(message, key), cryptoTools.SHA1(message));
+		//Packet packet = new Packet
+		Packet packet = new Packet(cryptoTools.encryptMessage(message, key));
 		try {
 			responses.writeObject(packet);
 			responses.flush();

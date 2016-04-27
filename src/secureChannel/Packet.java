@@ -3,28 +3,18 @@ package secureChannel;
 import java.io.Serializable;
 
 public class Packet implements Serializable{
-	String message;
-	String hashOfMessage;
+	String cipherText;
 	
-	
-	Packet()
+	Packet(String cipherText)
 	{
-		
-	}
-	
-	Packet(String message, String hashOfMessage)
-	{
-		this.message = message;
-		this.hashOfMessage = hashOfMessage;
+		this.cipherText = cipherText;
 	}
 
 	public String getMessage() {
-		return message;
+		return cipherText;
 	}
 
-	public String getHashOfMessage() {
-		return hashOfMessage;
-	}
+
 	
 	
 
