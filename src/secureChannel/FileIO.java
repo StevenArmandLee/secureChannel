@@ -14,7 +14,6 @@ public class FileIO {
 		{
 			inputFile = new FileReader(inputFileName);
 			BufferedReader bufferReader;
-			
 			try
 			{
 				bufferReader = new BufferedReader(inputFile);

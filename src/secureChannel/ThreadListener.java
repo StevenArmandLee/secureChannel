@@ -36,21 +36,20 @@ public class ThreadListener implements Runnable{
 				byte[] buffer = new byte[1000];
 				DatagramPacket packet;
 				String message = socketIO.receivePacket(port,reciverSocket);
-				//cryptoTools.getMessage(packet.getMessage(), key);
-				//cryptoTools.getHash(packet.getMessage(),key);
 				if(cryptoTools.authenticateMessage(message, key))
 				{
-					System.out.println(cryptoTools.getMessage(message, key));
-					
+					String plainText = cryptoTools.getMessage(message, key);
+					if(plainText.toLowerCase().equals("exit"));
+					{
+						System.out.println("aa");
+						//System.exit(0);
+					}
+					System.out.println(plainText);
 				}
 				else
 				{
 					System.out.println("decryption error");
 				}
-				
-				
-				
-			
 		}
 		
 	}

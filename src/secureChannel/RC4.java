@@ -9,7 +9,7 @@ public class RC4 {
 	//Werte können angepasst werden, wobei zu beachten ist, dass wenn KEY_SIZE_MAX geändert wird,
 		//alte Keys nicht mehr funktionieren werden. Genaueres in der Methode schedule();
 		private static final int KEY_SIZE_MIN = 1;
-		private static final int KEY_SIZE_MAX = 256;
+		private static final int KEY_SIZE_MAX = 128;
 		
 		/**
 		 * Dies dient zur Überprüfung, ob der Key gültig ist.

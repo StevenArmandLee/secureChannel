@@ -9,16 +9,16 @@ public class CryptoTools {
 	public static String encrypt(String message, String key)
 	{
 		StringBuffer stringBuffer = new StringBuffer();
-		for(int i=0; i<rc4.crypt(key, message).length;i++)
+		char[] cipherText = rc4.crypt(key, message);
+		for(int i=0; i<cipherText.length;i++)
 		{
-			stringBuffer.append(rc4.crypt(key, message)[i]);
+			stringBuffer.append(cipherText[i]);
 		}
 	
 		return stringBuffer.toString();
 	}
 	public static String decrypt(String message, String key)
 	{
-	
 		return encrypt(message,key);
 	}
 	
@@ -59,7 +59,6 @@ public class CryptoTools {
 	public static String getHash (String message, String key)
 	{
 		return decrypt(message,key).substring(message.length()-40, message.length());
-		//return message.substring(message.length()-40, message.length());
 	}
 	
 	public boolean authenticateMessage(String message, String key)
@@ -67,6 +66,7 @@ public class CryptoTools {
 		boolean decision = false;
 		String hashOfMessage = getHash(message,key);
 		String actualMessage = getMessage(message, key);
+
 		if(SHA1((key+actualMessage+key)).equals(hashOfMessage))
 		{
 			decision= true;

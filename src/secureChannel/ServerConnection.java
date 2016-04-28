@@ -23,7 +23,6 @@ public class ServerConnection {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		
 	}
 	
 	
@@ -33,15 +32,12 @@ public class ServerConnection {
 	{
 		String nonce = Nonce.getNonce();
 		String clientNonce=null;
-		
+		String hashedClientServerNonce = null;
 		socketIO.sendNonce(nonce,key,DEFAULT_SEND_PORT);
 		clientNonce=socketIO.receiveNonce(DEFAULT_RECEIVE_PORT,reciverSocket,key);
-		//nonce = cryptoTools.encrypt(nonce, cryptoTools.SHA1(key));
-		//System.out.println(nonce);
-		//System.out.println(clientNonce);
-		System.out.println("the recived decrypt"+clientNonce);
-		System.out.println("length of recived nonce " + clientNonce.length());
-		return cryptoTools.SHA1(nonce+clientNonce);
+		hashedClientServerNonce =  cryptoTools.SHA1(nonce+clientNonce);
+		System.out.println("finished exchanging protocol. With established key " + hashedClientServerNonce);
+		return hashedClientServerNonce;
 	}
 	
 	
@@ -51,24 +47,25 @@ public class ServerConnection {
 		
 		while(true)
 		{
-			String input = Keyboard.readString("test:");
+			String input = Keyboard.readString("Message to be sent: ");
+			socketIO.sendPacket(input,establishedKey,DEFAULT_SEND_PORT);
 			if(input.toLowerCase().equals("exit"))
 			{
 				threadListener.stop();
 				System.exit(0);
 				//TODO break from the while loop and close connectionand stop the thread
 			}
-			socketIO.sendPacket(input,establishedKey,DEFAULT_SEND_PORT);
+			
 		}
 	}
 	
 	public void run()
 	{
-		establishedKey=establishSecureKey("123");
+		establishedKey=establishSecureKey(FileIO.readFile("PW.txt"));
+		System.out.println("starting thread for listening to incoming message!");
 		threadListener = new ThreadListener(socket,establishedKey,DEFAULT_RECEIVE_PORT,reciverSocket);
 		readInputToBeSent();
 	}
-	
 	public static void main(String[] args) {
 	ServerConnection c = new ServerConnection();
 	c.run();

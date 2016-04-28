@@ -35,11 +35,7 @@ public class SocketIO {
 	{
 	
 		DatagramSocket socket;
-		System.out.println("nonce is " +message);
 		String cipherText = cryptoTools.encrypt(message, cryptoTools.SHA1(key));
-		System.out.println("encrypted is " +cipherText);
-		System.out.println("decrypted is " +cryptoTools.decrypt(cipherText, cryptoTools.SHA1(key)));
-		System.out.println("the length is " + cipherText.length());
 		byte[] buffer = cipherText.getBytes();
 		try {
 			socket = new DatagramSocket();
@@ -67,7 +63,6 @@ public class SocketIO {
 			packet = new DatagramPacket(buffer,buffer.length);
 			socket.receive(packet);
 			message = new String(packet.getData(),0,packet.getLength());	
-			System.out.println("recived message" + message);
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
