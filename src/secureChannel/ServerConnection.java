@@ -5,86 +5,46 @@ import java.net.*;
 
 public class ServerConnection {
 	InetAddress internetAddress;
-	private static final int DEFAULT_PORT = 4444;
-	private ObjectInputStream requests;
-	private ObjectOutputStream responses;
+	private static final int DEFAULT_SEND_PORT = 4444;
+	private static final int DEFAULT_RECEIVE_PORT = 4445;
 	CryptoTools cryptoTools = new CryptoTools();
 	private String establishedKey;
 	private SocketIO socketIO = new SocketIO();
 	ThreadListener threadListener;
-
+	DatagramSocket socket = null;
+	private DatagramSocket reciverSocket;
 	
 	
 	ServerConnection()
 	{
-		int port = DEFAULT_PORT;
-		ServerSocket reception_socket = null;
 		try {
-			reception_socket = new ServerSocket(port);
-			System.out.println("Started server on port:" + port);
-		} catch (IOException io) {
-			System.out.println("Cannot create server socket");
-			System.exit(0);
+			reciverSocket = new DatagramSocket(DEFAULT_RECEIVE_PORT);
+		} catch (SocketException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
 		}
-		
-		establishClientConnection(reception_socket);
 		
 	}
 	
 	
-	public void establishClientConnection(ServerSocket reception_socket)
-	{
-		for (;;) {
-			Socket client_socket = null;
-
-			try {
-				client_socket = reception_socket.accept();
-				System.out.println("Accepting request from "
-						+ client_socket.getInetAddress());
-			} catch (IOException ex) {
-				System.out.println("Problem accepting client socket");
-			}
-			establishIO(client_socket);
-		}
-		
-		
-	}
+	
 	
 	public String establishSecureKey(String key)
 	{
 		String nonce = Nonce.getNonce();
 		String clientNonce=null;
-		Packet packet;
-		socketIO.sendPacket(nonce,key,responses);
-		try {
-			packet = (Packet)requests.readObject();
-			clientNonce=cryptoTools.getMessage(packet.getMessage(), key);
-		} catch (ClassNotFoundException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
 		
-		return nonce+clientNonce;
+		socketIO.sendNonce(nonce,key,DEFAULT_SEND_PORT);
+		clientNonce=socketIO.receiveNonce(DEFAULT_RECEIVE_PORT,reciverSocket,key);
+		//nonce = cryptoTools.encrypt(nonce, cryptoTools.SHA1(key));
+		//System.out.println(nonce);
+		//System.out.println(clientNonce);
+		System.out.println("the recived decrypt"+clientNonce);
+		System.out.println("length of recived nonce " + clientNonce.length());
+		return cryptoTools.SHA1(nonce+clientNonce);
 	}
 	
-	public void establishIO(Socket socket)
-	{
-		try {
-			responses = new ObjectOutputStream(socket.getOutputStream());
-			requests = new ObjectInputStream(socket.getInputStream());
-			responses.flush();
-			run();
-
-		} catch (IOException io) {
-			System.out.println("Cannot open stream");
-
-			
-			System.exit(0);
-		}
-	}
+	
 	
 	public void readInputToBeSent()
 	{
@@ -98,19 +58,20 @@ public class ServerConnection {
 				System.exit(0);
 				//TODO break from the while loop and close connectionand stop the thread
 			}
-			socketIO.sendPacket(input,establishedKey,responses);
+			socketIO.sendPacket(input,establishedKey,DEFAULT_SEND_PORT);
 		}
 	}
 	
 	public void run()
 	{
 		establishedKey=establishSecureKey("123");
-		threadListener = new ThreadListener(requests,establishedKey);
+		threadListener = new ThreadListener(socket,establishedKey,DEFAULT_RECEIVE_PORT,reciverSocket);
 		readInputToBeSent();
 	}
 	
 	public static void main(String[] args) {
 	ServerConnection c = new ServerConnection();
+	c.run();
 	
 	}
 	

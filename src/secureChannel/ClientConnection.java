@@ -5,43 +5,26 @@ import java.io.ObjectOutputStream;
 import java.net.*;
 public class ClientConnection {
 
-	private static final int DEFAULT_PORT = 4444;
+	private static final int DEFAULT_SEND_PORT = 4445;
+	private static final int DEFAULT_RECEIVE_PORT = 4444;
 	private static final String hostName = "localhost";
 	private ObjectInputStream responseStream;
 	private ObjectOutputStream requestStream;
 	private InetAddress ina;
-	private static Socket socket;
+	private DatagramSocket socket;
 	private String establishedKey;
 	private SocketIO socketIO = new SocketIO();
 	CryptoTools cryptoTools = new CryptoTools();
 	ThreadListener threadListener;
+	private DatagramSocket reciverSocket;
 	
 	ClientConnection()
 	{
 		try {
-			ina = InetAddress.getByName(hostName);
-		} catch (UnknownHostException u) {
-			System.out.print("Cannot find host name");
-			System.exit(0);
-		}
-
-		try {
-			socket = new Socket(ina, DEFAULT_PORT);
-		} catch (IOException ex) {
-			System.out.print("Cannot connect to host");
-			System.exit(1);
-		}
-
-		// Get I/O streams make the ObjectStreams
-		// for serializable objects
-		try {
-			responseStream = new ObjectInputStream(socket.getInputStream());
-			requestStream = new ObjectOutputStream(socket.getOutputStream());
-			requestStream.flush();
-		} catch (IOException io) {
-
-			System.out.println("Failed to get socket streams");
-			System.exit(1);
+			reciverSocket = new DatagramSocket(DEFAULT_RECEIVE_PORT);
+		} catch (SocketException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
 		}
 	}
 	
@@ -53,18 +36,17 @@ public class ClientConnection {
 			String input = Keyboard.readString("test:");
 			if(input.toLowerCase().equals("exit"))
 			{
-				
 				threadListener.stop();
 				System.exit(0);
 			}
-			socketIO.sendPacket(input,establishedKey,requestStream);
+			socketIO.sendPacket(input,establishedKey,DEFAULT_SEND_PORT);
 		}
 	}
 	
 	public void messageListener()
 	{
 		establishedKey=establishSecureKey("123");
-		threadListener = new ThreadListener(responseStream,establishedKey);
+		threadListener = new ThreadListener(socket,establishedKey,DEFAULT_RECEIVE_PORT,reciverSocket);
 		
 		readInputToBeSent();
 	}
@@ -77,26 +59,24 @@ public class ClientConnection {
 	{
 		String nonce = Nonce.getNonce();
 		String hostNonce=null;
-		Packet packet;
-		
-		try {
-			packet = (Packet)responseStream.readObject();
-			hostNonce=cryptoTools.getMessage(packet.getMessage(), key);
-		} catch (ClassNotFoundException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		socketIO.sendPacket(nonce,key,requestStream);
-		
-		return hostNonce+nonce;
+			
+			hostNonce=socketIO.receiveNonce(DEFAULT_RECEIVE_PORT,reciverSocket,key);
+			socketIO.sendNonce(nonce,key,DEFAULT_SEND_PORT);
+			//nonce = cryptoTools.encrypt(nonce, cryptoTools.SHA1(key));
+			//System.out.println(nonce);
+			//System.out.println(hostNonce);
+			System.out.println("the recived decrypt"+hostNonce);
+			System.out.println("length of recived nonce " + hostNonce.length());
+			return cryptoTools.SHA1(hostNonce+nonce);
 	}
 	
 	public static void main(String[] args) {
 		ClientConnection c = new ClientConnection();
 		c.messageListener();
+		//CryptoTools.encryptMessage("test", "aaaa");
+		//System.out.println(CryptoTools.encryptMessage("test", "aaaa"));
+		//System.out.println(CryptoTools.getHash(CryptoTools.encryptMessage("test", "aaaa"),"aaaa"));
+		//System.out.println(CryptoTools.SHA1("aaaa"+"test"+"aaaa"));
 		
 		
 			

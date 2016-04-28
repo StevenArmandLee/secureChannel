@@ -44,7 +44,7 @@ public class CryptoTools {
 	
 	public static String encryptMessage(String message, String key)
 	{
-		String hash = SHA1(key+message+key);
+		String hash = SHA1((key+message+key));
 		String cipherText = encrypt(message+hash,key);
 		
 		return cipherText;
@@ -67,8 +67,7 @@ public class CryptoTools {
 		boolean decision = false;
 		String hashOfMessage = getHash(message,key);
 		String actualMessage = getMessage(message, key);
-		
-		if(SHA1(key+actualMessage+key).equals(hashOfMessage))
+		if(SHA1((key+actualMessage+key)).equals(hashOfMessage))
 		{
 			decision= true;
 		}
