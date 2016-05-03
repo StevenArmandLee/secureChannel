@@ -1,7 +1,13 @@
+/*
+ * Name: Steven Lee
+ * Student ID: 4643483
+ * 
+ */
 package secureChannel;
 
 import java.io.IOException;
 import java.io.ObjectOutputStream;
+import java.io.UnsupportedEncodingException;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
@@ -12,12 +18,17 @@ public class SocketIO {
 	CryptoTools cryptoTools = new CryptoTools();
 
 
-	public void sendPacket(String message, String key, int portNumber)
+	public void sendPacket(String message, int portNumber)
 	{
 	
 		DatagramSocket socket;
-		String cipherText = cryptoTools.encryptMessage(message, key);
-		byte[] buffer = cipherText.getBytes();
+		byte[] buffer=null;
+				try {
+					buffer = message.getBytes("ISO-8859-1");
+				} catch (UnsupportedEncodingException e1) {
+					// TODO Auto-generated catch block
+					e1.printStackTrace();
+				}
 		try {
 			socket = new DatagramSocket();
 			DatagramPacket packet = new DatagramPacket(buffer,buffer.length,InetAddress.getByName("localhost"),portNumber);
@@ -36,7 +47,13 @@ public class SocketIO {
 	
 		DatagramSocket socket;
 		String cipherText = cryptoTools.encrypt(message, cryptoTools.SHA1(key));
-		byte[] buffer = cipherText.getBytes();
+		byte[] buffer=null;
+		try {
+			buffer = cipherText.getBytes("ISO-8859-1");
+		} catch (UnsupportedEncodingException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		}
 		try {
 			socket = new DatagramSocket();
 			DatagramPacket packet = new DatagramPacket(buffer,buffer.length,InetAddress.getByName("localhost"),portNumber);
@@ -52,23 +69,8 @@ public class SocketIO {
 	}
 	
 	public String receiveNonce( int portNumber, DatagramSocket socket, String key)
-	{
-		
-		byte[] buffer = new byte[512];
-		DatagramPacket packet;
-		String message=null;
-		//DatagramSocket socket;
-		try {
-			//socket = new DatagramSocket(portNumber);
-			packet = new DatagramPacket(buffer,buffer.length);
-			socket.receive(packet);
-			message = new String(packet.getData(),0,packet.getLength());	
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		
-		return cryptoTools.decrypt(message, cryptoTools.SHA1(key));
+	{	
+		return cryptoTools.decrypt(receivePacket(portNumber,socket), cryptoTools.SHA1(key));
 		
 	}
 	
@@ -78,12 +80,10 @@ public class SocketIO {
 		byte[] buffer = new byte[1000];
 		DatagramPacket packet;
 		String message=null;
-		//DatagramSocket socket;
 		try {
-			//socket = new DatagramSocket(portNumber);
 			packet = new DatagramPacket(buffer,buffer.length,InetAddress.getByName("localhost"),portNumber);
 			socket.receive(packet);
-			message = new String(packet.getData(),0,packet.getLength());	
+			message = new String(packet.getData(),0,packet.getLength(),"ISO-8859-1");	
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();

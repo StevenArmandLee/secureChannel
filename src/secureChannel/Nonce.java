@@ -1,3 +1,8 @@
+/*
+ * Name: Steven Lee
+ * Student ID: 4643483
+ * 
+ */
 package secureChannel;
 
 import java.util.Random;

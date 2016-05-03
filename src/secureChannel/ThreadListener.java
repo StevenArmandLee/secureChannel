@@ -1,3 +1,8 @@
+/*
+ * Name: Steven Lee
+ * Student ID: 4643483
+ * 
+ */
 package secureChannel;
 import java.io.IOException;
 import java.io.ObjectInputStream;
@@ -39,10 +44,11 @@ public class ThreadListener implements Runnable{
 				if(cryptoTools.authenticateMessage(message, key))
 				{
 					String plainText = cryptoTools.getMessage(message, key);
-					if(plainText.toLowerCase().equals("exit"));
+					
+					if(plainText.toLowerCase().equals("exit"))
 					{
-						System.out.println("aa");
-						//System.exit(0);
+						System.out.println("Connection has been disconnected by the other party!");
+						System.exit(0);
 					}
 					System.out.println(plainText);
 				}

@@ -1,5 +1,11 @@
+/*
+ * Name: Steven Lee
+ * Student ID: 4643483
+ * 
+ */
 package secureChannel;
 
+import java.io.UnsupportedEncodingException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 
@@ -8,14 +14,16 @@ public class CryptoTools {
 	
 	public static String encrypt(String message, String key)
 	{
-		StringBuffer stringBuffer = new StringBuffer();
-		char[] cipherText = rc4.crypt(key, message);
-		for(int i=0; i<cipherText.length;i++)
-		{
-			stringBuffer.append(cipherText[i]);
+
+		String cipherText=null;
+		try {
+			cipherText = rc4.encrypt(message, key);
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
 		}
-	
-		return stringBuffer.toString();
+		
+		return cipherText;
 	}
 	public static String decrypt(String message, String key)
 	{
@@ -29,13 +37,16 @@ public class CryptoTools {
 		StringBuffer stringBuffer = new StringBuffer();
 		try {
 			mDigest = MessageDigest.getInstance("SHA1");
-			byte[] result = mDigest.digest(input.getBytes());
+			byte[] result = mDigest.digest(input.getBytes("ISO-8859-1"));
 			for(int i = 0; i < result.length; i++)
 			{
 				stringBuffer.append(Integer.toString((result[i] & 0xff)+0x100,16).substring(1));
 				
 			}
 		} catch (NoSuchAlgorithmException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (UnsupportedEncodingException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}

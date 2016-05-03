@@ -1,3 +1,8 @@
+/*
+ * Name: Steven Lee
+ * Student ID: 4643483
+ * 
+ */
 package secureChannel;
 
 import java.io.*;
@@ -30,13 +35,18 @@ public class ServerConnection {
 	
 	public String establishSecureKey(String key)
 	{
+		key = cryptoTools.SHA1(key);
 		String nonce = Nonce.getNonce();
 		String clientNonce=null;
 		String hashedClientServerNonce = null;
-		socketIO.sendNonce(nonce,key,DEFAULT_SEND_PORT);
+		socketIO.sendPacket(cryptoTools.encrypt(nonce, cryptoTools.SHA1(key)),DEFAULT_SEND_PORT);
 		clientNonce=socketIO.receiveNonce(DEFAULT_RECEIVE_PORT,reciverSocket,key);
 		hashedClientServerNonce =  cryptoTools.SHA1(nonce+clientNonce);
-		System.out.println("finished exchanging protocol. With established key " + hashedClientServerNonce);
+		
+		System.out.println("The nounce is :" + nonce);
+		System.out.println("The nounce of the other party is :" + clientNonce);
+		System.out.println("finished exchanging protocol. With established key " + hashedClientServerNonce + "\n");
+		
 		return hashedClientServerNonce;
 	}
 	
@@ -48,12 +58,12 @@ public class ServerConnection {
 		while(true)
 		{
 			String input = Keyboard.readString("Message to be sent: ");
-			socketIO.sendPacket(input,establishedKey,DEFAULT_SEND_PORT);
+			String chiperText = cryptoTools.encryptMessage(input, establishedKey);
+			socketIO.sendPacket(chiperText,DEFAULT_SEND_PORT);
 			if(input.toLowerCase().equals("exit"))
 			{
 				threadListener.stop();
 				System.exit(0);
-				//TODO break from the while loop and close connectionand stop the thread
 			}
 			
 		}
@@ -61,11 +71,15 @@ public class ServerConnection {
 	
 	public void run()
 	{
+		System.out.println("waiting for client to connect");
+		socketIO.receivePacket(DEFAULT_RECEIVE_PORT, reciverSocket); // to wait untill there is a client
+		System.out.println("connected to the client");
 		establishedKey=establishSecureKey(FileIO.readFile("PW.txt"));
 		System.out.println("starting thread for listening to incoming message!");
 		threadListener = new ThreadListener(socket,establishedKey,DEFAULT_RECEIVE_PORT,reciverSocket);
 		readInputToBeSent();
 	}
+	
 	public static void main(String[] args) {
 	ServerConnection c = new ServerConnection();
 	c.run();
